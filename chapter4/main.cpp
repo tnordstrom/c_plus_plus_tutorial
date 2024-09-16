@@ -16,6 +16,8 @@ int enterNumber(void)
 /* Determines if a number <= 10 is prime, greater numbers always return false */
 bool isPrime(int val)
 {
+	bool result{ false };
+	
 	switch(val)
 	{
 		case 0:
@@ -25,19 +27,17 @@ bool isPrime(int val)
 		case 8:
 		case 9:
 		case 10:
-			return false;
 			break;
 		case 2:
 		case 3:
 		case 5:
 		case 7:
-			return true;
+			result = true;
 			break;
 		default:
-			return false;
 			break;
 	}
-	return false;
+	return result;
 }
 
 int main()
