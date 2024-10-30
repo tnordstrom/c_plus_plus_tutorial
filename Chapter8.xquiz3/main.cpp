@@ -20,13 +20,11 @@ int main ( void )
 	std::cin >> num_guesses;
 	 
 	std::cout << "Let's play a game. I've picked a number between " << min << " and " << max << ". I'll give you " << num_guesses << " tries to guess it\n";
-	bool won { false };
 	
 	do
 	{
 		int random_number { Random::get(min, max) };
-		
-		won = false;
+		bool won { false };
 		
 		for (int i {1}; i <= num_guesses; i++)
 		{
