@@ -1,9 +1,16 @@
 /* Tony Nordstrom */
-/* October 29 02024 */
-/* Chapter 8.x quiz question 3 */
+/* November 5 02024 */
+/* Chapter 9.x quiz question 1 */
 
 #include "random.h"
 #include <iostream>
+#include <limits>
+
+void ignoreLine( void )
+{
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	return;
+}
 
 int main ( void )
 {
@@ -32,6 +39,24 @@ int main ( void )
 			int guess { 0 };
 			std::cin >> guess;
 			
+			if (!std::cin)
+			{
+				std::cout << "Invalid input, try again\n";
+				std::cin.clear();
+				ignoreLine();
+				i--;
+				continue;
+			}
+			
+			ignoreLine();
+			
+			if ((guess < min) or (guess > max))
+			{
+				std::cout << "Guess is out of range, try again\n";
+				i--;
+				continue;
+			}
+			
 			if (guess > random_number)
 			{
 				std::cout << "Your guess is too high\n";
@@ -56,6 +81,8 @@ int main ( void )
 		std::cout << "Would you like to play again? y/n: ";
 
 		std::cin >> answer;
+		
+		ignoreLine();
 		
 	} while (answer == 'y');
 	
