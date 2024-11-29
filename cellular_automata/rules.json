@@ -1,0 +1,24 @@
+{
+	"full_cell_rules": {
+							"rule0": 0,
+							"rule1": 0,
+							"rule2": 2,
+							"rule3": 2,
+							"rule4": 0,
+							"rule5": 0,
+							"rule6": 0,
+							"rule7": 0,
+							"rule8": 0,
+						}
+	"empty_cell_rules": {
+							"rule0": 2,
+							"rule1": 2,
+							"rule2": 2,
+							"rule3": 1,
+							"rule4": 1,
+							"rule5": 1,
+							"rule6": 1,
+							"rule7": 1,
+							"rule8": 1,
+						}
+}
