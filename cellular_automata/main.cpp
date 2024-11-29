@@ -13,17 +13,30 @@
  Any alive cell touching four or more alive neighbours dies.
  Any alive cell touching two or three alive neighbours does nothing.
  Any dead cell touching exactly three alive neighbours becomes alive.
+ - Accepts commands
+ - Runs in a loop
+ - Prints version / about string
+ Version 0.3
+ - Read rules from a json file
+ - Apply changes by j command
  */
 
 #include <iostream>
 #include <random>
 
+const std::string version { "0.2" };
 const char empty { ' ' };
 const char full { '#' };
+const char unchanged { '-' };
 const int grid_length { 20 };
 const int grid_width { 80 };
 char grid[grid_length][grid_width];
-
+int neigh[grid_length][grid_width];
+char full_cell_rules[9] =
+{ empty, empty, unchanged, unchanged, empty, empty, empty, empty, empty };
+char empty_cell_rules[9] =
+{ unchanged, unchanged, unchanged, full, unchanged, unchanged, unchanged, unchanged, unchanged };
+	
 /* Calculate the number of neighbouring full cells */
 int neighbours (int x, int y)
 {
@@ -103,6 +116,27 @@ int neighbours (int x, int y)
 	return retval;
 }
 
+/* Apply the neighbour rules to the cell */
+void apply_rules(int x, int y)
+{
+	if (grid[x][y] == full)
+	{
+		if (full_cell_rules[neigh[x][y]] != unchanged)
+		{
+			grid[x][y] = full_cell_rules[neigh[x][y]];
+		}
+	}
+	else if (grid[x][y] == empty)
+	{
+		if (empty_cell_rules[neigh[x][y]] != unchanged)
+		{
+			grid[x][y] = empty_cell_rules[neigh[x][y]];
+		}
+	}
+	
+	return;
+}
+
 int main ( void )
 {
 	
@@ -115,38 +149,74 @@ int main ( void )
 		}
 	}
 	
-	/* Print the grid */
-	for (int i { 0 }; i < grid_length; i++)
+	while (true)
 	{
-		for (int j { 0 }; j < grid_width; j++)
+		/* Print the grid */
+		for (int i { 0 }; i < grid_length; i++)
 		{
-			std::cout << grid[i][j];
+			for (int j { 0 }; j < grid_width; j++)
+			{
+				std::cout << grid[i][j];
+			}
+			
+			std::cout << '\n';
+		}
+	
+		/* Calculate the neighbours, store in int array */
+		for (int i { 0 }; i < grid_length; i++)
+		{
+			for (int j { 0 }; j < grid_width; j++)
+			{
+				neigh[i][j] = neighbours(i, j);
+			}
+		}
+	
+		/* Print the neighbour info */
+		for (int i { 0 }; i < grid_length; i++)
+		{
+			for (int j { 0 }; j < grid_width; j++)
+			{
+				std::cout << neigh[i][j];
+			}
+		
+			std::cout << '\n';
+		}
+	
+		/* Apply the rules to the grid */
+		for (int i { 0 }; i < grid_length; i++)
+		{
+			for (int j { 0 }; j < grid_width; j++)
+			{
+				apply_rules(i, j);
+			}
 		}
 		
-		std::cout << '\n';
-	}
-	
-	/* Calculate the neighbours, store in int array */
-	int neigh[grid_length][grid_width];
-	for (int i { 0 }; i < grid_length; i++)
-	{
-		for (int j { 0 }; j < grid_width; j++)
+		/* Get a command from the user */
+		char command { 0 };
+		std::cin >> command;
+		switch (command)
 		{
-			neigh[i][j] = neighbours(i, j);
+			case 'q':
+				goto exit;
+			case 'r':
+				continue; /* Doesn't do anything that any other non-q command does */
+			case 'h':
+			case '?':
+				std::cout << "q - quit, r - run, h/? - help, a - about, j - reload json\n";
+				break;
+			case 'a':
+				std::cout << "Cellular automata version " << version << " by Tony Nordstrom\n";
+				break;
+			case 'j':
+				std::cout << "Reload rules from json file (TBD)\n";
+				break;
+			default:
+				break;
 		}
 	}
 	
-	/* Print the neighbour info */
-	for (int i { 0 }; i < grid_length; i++)
-	{
-		for (int j { 0 }; j < grid_width; j++)
-		{
-			std::cout << neigh[i][j];
-		}
-		
-		std::cout << '\n';
-	}
-	
+exit:
+
 	return 0;
 }
 
