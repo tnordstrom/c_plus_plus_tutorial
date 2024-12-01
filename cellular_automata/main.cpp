@@ -17,11 +17,16 @@
  - Runs in a loop
  - Prints version / about string
  Version 0.3
- - Command j read rules from a json file
+ - Command j reads rules from a json file, using json library from https://json.nlohmann.me/
  - Refactored out unchanged 3rd state in rules
  - Grid is now bool not char
  - Converts to char only on print
  - Command p prints out the rules
+ Version 0.4
+ - Command z sets rules to random
+ - Command s saves rules to json
+ - Command d sets rules to default
+ - Command e edits rules manually
  */
 
 #include <iostream>
