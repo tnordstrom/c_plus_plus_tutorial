@@ -17,26 +17,32 @@
  - Runs in a loop
  - Prints version / about string
  Version 0.3
- - Read rules from a json file
- - Apply changes by j command
+ - Command j read rules from a json file
+ - Refactored out unchanged 3rd state in rules
+ - Grid is now bool not char
+ - Converts to char only on print
+ - Command p prints out the rules
  */
 
 #include <iostream>
+#include <fstream>
 #include <random>
+#include "json.hpp"
 
-const std::string version { "0.2" };
+using json = nlohmann::json;
+
+const std::string version { "0.3" };
 const char empty { ' ' };
 const char full { '#' };
-const char unchanged { '-' };
 const int grid_length { 20 };
 const int grid_width { 80 };
-char grid[grid_length][grid_width];
+bool grid[grid_length][grid_width];
 int neigh[grid_length][grid_width];
-char full_cell_rules[9] =
-{ empty, empty, unchanged, unchanged, empty, empty, empty, empty, empty };
-char empty_cell_rules[9] =
-{ unchanged, unchanged, unchanged, full, unchanged, unchanged, unchanged, unchanged, unchanged };
-	
+bool full_cell_rules[9] =
+{ 0, 0, 1, 1, 0, 0, 0, 0, 0 };
+bool empty_cell_rules[9] =
+{ 0, 0, 0, 1, 0, 0, 0, 0, 0 };
+
 /* Calculate the number of neighbouring full cells */
 int neighbours (int x, int y)
 {
@@ -58,56 +64,56 @@ int neighbours (int x, int y)
 		
 	if ((on_edge_x == false) && (on_edge_y == false))
 	{
-		if (grid[x-1][y-1] == full)
+		if (grid[x-1][y-1] == true)
 		{
 			retval++;
 		}
 	}
 	if (on_edge_y == false)
 	{
-		if (grid[x][y-1] == full)
+		if (grid[x][y-1] == true)
 		{
 			retval++;
 		}
 	}
 	if ((on_edge_xx == false) && (on_edge_y == false))
 	{
-		if (grid[x+1][y-1] == full)
+		if (grid[x+1][y-1] == true)
 		{
 			retval++;
 		}
 	}
 	if (on_edge_x == false)
 	{
-		if (grid[x-1][y] == full)
+		if (grid[x-1][y] == true)
 		{
 			retval++;
 		}
 	}
 	if (on_edge_xx == false)
 	{
-		if (grid[x+1][y] == full)
+		if (grid[x+1][y] == true)
 		{
 			retval++;
 		}
 	}
 	if ((on_edge_x == false) && (on_edge_yy == false))
 	{
-		if (grid[x-1][y+1] == full)
+		if (grid[x-1][y+1] == true)
 		{
 			retval++;
 		}
 	}
 	if (on_edge_yy == false)
 	{
-		if (grid[x][y+1] == full)
+		if (grid[x][y+1] == true)
 		{
 			retval++;
 		}
 	}
 	if ((on_edge_xx == false) && (on_edge_yy == false))
 	{
-		if (grid[x+1][y+1] == full)
+		if (grid[x+1][y+1] == true)
 		{
 			retval++;
 		}
@@ -119,20 +125,59 @@ int neighbours (int x, int y)
 /* Apply the neighbour rules to the cell */
 void apply_rules(int x, int y)
 {
-	if (grid[x][y] == full)
+	if (grid[x][y] == true)
 	{
-		if (full_cell_rules[neigh[x][y]] != unchanged)
-		{
-			grid[x][y] = full_cell_rules[neigh[x][y]];
-		}
+		grid[x][y] = full_cell_rules[neigh[x][y]];
 	}
-	else if (grid[x][y] == empty)
+	else if (grid[x][y] == false)
 	{
-		if (empty_cell_rules[neigh[x][y]] != unchanged)
-		{
-			grid[x][y] = empty_cell_rules[neigh[x][y]];
-		}
+		grid[x][y] = empty_cell_rules[neigh[x][y]];
 	}
+	
+	return;
+}
+
+/* Read rule set from json file */
+void get_json(void)
+{
+
+	std::ifstream i("rules.json");
+	auto j = json::parse(i);
+	std::cout << j.dump(2) << '\n';
+
+	int index { 0 };
+	for (auto it = j.begin(); it != j.end(); ++it)
+	{
+		std::cout << it.key() << ": " << it.value() << '\n';
+		if (index < 9)
+		{
+			empty_cell_rules[index] = it.value();
+		}
+		else
+		{
+			full_cell_rules[index-9] = it.value();
+		}
+		index++;
+	}	
+	return;
+}
+
+/* Print the current rules */
+void print_rules(void)
+{
+	std::cout << "empty_cell_rules: ";
+	for (int i { 0 }; i <= 8; i++)
+	{
+		std::cout << empty_cell_rules[i] << ", ";
+	}
+	std::cout << '\n';
+	
+	std::cout << "full_cell_rules: ";
+	for (int i { 0 }; i <= 8; i++)
+	{
+		std::cout << full_cell_rules[i] << ", ";
+	}
+	std::cout << '\n';
 	
 	return;
 }
@@ -145,7 +190,7 @@ int main ( void )
 	{
 		for (int j { 0 }; j < grid_width; j++)
 		{
-			grid[i][j] = rand() % 2 ? empty : full;
+			grid[i][j] = rand() % 2 ? false : true;
 		}
 	}
 	
@@ -156,7 +201,7 @@ int main ( void )
 		{
 			for (int j { 0 }; j < grid_width; j++)
 			{
-				std::cout << grid[i][j];
+				std::cout << (grid[i][j] ? full : empty);
 			}
 			
 			std::cout << '\n';
@@ -202,13 +247,17 @@ int main ( void )
 				continue; /* Doesn't do anything that any other non-q command does */
 			case 'h':
 			case '?':
-				std::cout << "q - quit, r - run, h/? - help, a - about, j - reload json\n";
+				std::cout << "q - quit, r - run, h/? - help, a - about, j - load rules from json, p - print rules\n";
 				break;
 			case 'a':
 				std::cout << "Cellular automata version " << version << " by Tony Nordstrom\n";
 				break;
 			case 'j':
-				std::cout << "Reload rules from json file (TBD)\n";
+				std::cout << "Reload rules from json file\n";
+				get_json();
+				break;
+			case 'p':
+				print_rules();
 				break;
 			default:
 				break;
