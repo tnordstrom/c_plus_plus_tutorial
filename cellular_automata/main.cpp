@@ -23,6 +23,8 @@
  - Converts to char only on print
  - Command p prints out the rules
  Version 0.4
+ - Command b runs built in self test
+ Version 0.5
  - Command z sets rules to random
  - Command s saves rules to json
  - Command d sets rules to default
@@ -34,9 +36,12 @@
 #include <random>
 #include "json.hpp"
 
+/* Define to invoke a failure of the BIST */
+#undef BIST_FAIL
+
 using json = nlohmann::json;
 
-const std::string version { "0.3" };
+const std::string version { "0.4" };
 const char empty { ' ' };
 const char full { '#' };
 const int grid_length { 20 };
@@ -120,7 +125,9 @@ int neighbours (int x, int y)
 	{
 		if (grid[x+1][y+1] == true)
 		{
+#ifndef BIST_FAIL // Screw up the neighbour count to cause BIST to fail
 			retval++;
+#endif
 		}
 	}
 	
@@ -187,6 +194,255 @@ void print_rules(void)
 	return;
 }
 
+/* Print the grid */
+void print_grid(void)
+{
+	for (int i { 0 }; i < grid_length; i++)
+	{
+		for (int j { 0 }; j < grid_width; j++)
+		{
+			std::cout << (grid[i][j] ? full : empty);
+		}
+			
+		std::cout << '\n';
+	}
+	
+	return;
+}
+
+/* Run the Built In Self Test */
+/* To invoke a failure, #define BIST_FAIL */
+void run_bist(void)
+{
+	/* Y-coordinate of centres of each test pattern (X-coord always 1) */
+	//int centres_empty [] = { 1, 4, 7, 10, 13, 16, 19, 22, 25 };
+	//int centres_full [] = { 28, 31, 34, 37, 40, 43, 46, 49, 52 };
+	
+	std::cout << "Running the Built In Self Test\n";
+	
+	/* Write the test pattern to the grid, 9 patterns x 2 states */
+	/* Sorry this is so brute-force but I couldn't find another way with 
+	 * C-style arrays maybe std::vector once I learn about it would be better */
+	
+	/* Pattern 0 */
+	grid[0][0] = 0;
+	grid[0][1] = 0;
+	grid[0][2] = 0;
+	grid[1][0] = 0;
+	grid[1][1] = 0;
+	grid[1][2] = 0;
+	grid[2][0] = 0;
+	grid[2][1] = 0;
+	grid[2][2] = 0;
+	
+	/* Pattern 1 */
+	grid[0][3] = 0;
+	grid[0][4] = 0;
+	grid[0][5] = 0;
+	grid[1][3] = 0;
+	grid[1][4] = 0;
+	grid[1][5] = 0;
+	grid[2][3] = 0;
+	grid[2][4] = 0;
+	grid[2][5] = 1;
+
+	/* Pattern 2 */
+	grid[0][6] = 0;
+	grid[0][7] = 0;
+	grid[0][8] = 0;
+	grid[1][6] = 0;
+	grid[1][7] = 0;
+	grid[1][8] = 0;
+	grid[2][6] = 0;
+	grid[2][7] = 1;
+	grid[2][8] = 1;
+	
+	/* Pattern 3 */
+	grid[0][9]  = 0;
+	grid[0][10] = 0;
+	grid[0][11] = 0;
+	grid[1][9]  = 0;
+	grid[1][10] = 0;
+	grid[1][11] = 0;
+	grid[2][9]  = 1;
+	grid[2][10] = 1;
+	grid[2][11] = 1;
+
+	/* Pattern 4 */
+	grid[0][12] = 0;
+	grid[0][13] = 0;
+	grid[0][14] = 0;
+	grid[1][12] = 0;
+	grid[1][13] = 0;
+	grid[1][14] = 1;
+	grid[2][12] = 1;
+	grid[2][13] = 1;
+	grid[2][14] = 1;
+
+	/* Pattern 5 */
+	grid[0][15] = 0;
+	grid[0][16] = 0;
+	grid[0][17] = 0;
+	grid[1][15] = 1;
+	grid[1][16] = 0;
+	grid[1][17] = 1;
+	grid[2][15] = 1;
+	grid[2][16] = 1;
+	grid[2][17] = 1;
+
+	/* Pattern 6 */
+	grid[0][18] = 0;
+	grid[0][19] = 0;
+	grid[0][20] = 1;
+	grid[1][18] = 1;
+	grid[1][19] = 0;
+	grid[1][20] = 1;
+	grid[2][18] = 1;
+	grid[2][19] = 1;
+	grid[2][20] = 1;
+
+	/* Pattern 7 */
+	grid[0][21] = 0;
+	grid[0][22] = 1;
+	grid[0][23] = 1;
+	grid[1][21] = 1;
+	grid[1][22] = 0;
+	grid[1][23] = 1;
+	grid[2][21] = 1;
+	grid[2][22] = 1;
+	grid[2][23] = 1;
+
+	/* Pattern 8 */
+	grid[0][24] = 1;
+	grid[0][25] = 1;
+	grid[0][26] = 1;
+	grid[1][24] = 1;
+	grid[1][25] = 0;
+	grid[1][26] = 1;
+	grid[2][24] = 1;
+	grid[2][25] = 1;
+	grid[2][26] = 1;
+
+	/* Pattern 0-1 */
+	grid[0][27] = 0;
+	grid[0][28] = 0;
+	grid[0][29] = 0;
+	grid[1][27] = 0;
+	grid[1][28] = 1;
+	grid[1][29] = 0;
+	grid[2][27] = 0;
+	grid[2][28] = 0;
+	grid[2][29] = 0;
+	
+	/* Pattern 1-1 */
+	grid[0][30] = 0;
+	grid[0][31] = 0;
+	grid[0][32] = 0;
+	grid[1][30] = 0;
+	grid[1][31] = 1;
+	grid[1][32] = 0;
+	grid[2][30] = 0;
+	grid[2][31] = 0;
+	grid[2][32] = 1;
+
+	/* Pattern 2-1 */
+	grid[0][33] = 0;
+	grid[0][34] = 0;
+	grid[0][35] = 0;
+	grid[1][33] = 0;
+	grid[1][34] = 1;
+	grid[1][35] = 0;
+	grid[2][33] = 0;
+	grid[2][34] = 1;
+	grid[2][35] = 1;
+	
+	/* Pattern 3-1 */
+	grid[0][36] = 0;
+	grid[0][37] = 0;
+	grid[0][38] = 0;
+	grid[1][36] = 0;
+	grid[1][37] = 1;
+	grid[1][38] = 0;
+	grid[2][36] = 1;
+	grid[2][37] = 1;
+	grid[2][38] = 1;
+
+	/* Pattern 4-1 */
+	grid[0][39] = 0;
+	grid[0][40] = 0;
+	grid[0][41] = 0;
+	grid[1][39] = 0;
+	grid[1][40] = 1;
+	grid[1][41] = 1;
+	grid[2][39] = 1;
+	grid[2][40] = 1;
+	grid[2][41] = 1;
+
+	/* Pattern 5-1 */
+	grid[0][42] = 0;
+	grid[0][43] = 0;
+	grid[0][44] = 0;
+	grid[1][42] = 1;
+	grid[1][43] = 1;
+	grid[1][44] = 1;
+	grid[2][42] = 1;
+	grid[2][43] = 1;
+	grid[2][44] = 1;
+
+	/* Pattern 6-1 */
+	grid[0][45] = 0;
+	grid[0][46] = 0;
+	grid[0][47] = 1;
+	grid[1][45] = 1;
+	grid[1][46] = 1;
+	grid[1][47] = 1;
+	grid[2][45] = 1;
+	grid[2][46] = 1;
+	grid[2][47] = 1;
+
+	/* Pattern 7-1 */
+	grid[0][48] = 0;
+	grid[0][49] = 1;
+	grid[0][50] = 1;
+	grid[1][48] = 1;
+	grid[1][49] = 1;
+	grid[1][50] = 1;
+	grid[2][48] = 1;
+	grid[2][49] = 1;
+	grid[2][50] = 1;
+
+	/* Pattern 8-1 */
+	grid[0][51] = 1;
+	grid[0][52] = 1;
+	grid[0][53] = 1;
+	grid[1][51] = 1;
+	grid[1][52] = 1;
+	grid[1][53] = 1;
+	grid[2][51] = 1;
+	grid[2][52] = 1;
+	grid[2][53] = 1;
+	
+	std::cout << "Test pattern:\n";
+	
+	/* Print the grid */
+	print_grid();
+	
+	/* For each test pattern, calculate neighbours and apply rules */
+	
+	std::cout << "Applied neighbour rules:\n";
+	
+	/* Print the grid */
+	print_grid();
+	
+	std::cout << "Test result: TBD\n";
+	
+	/* If result matches expected, pass */
+	
+	/* Otherwise, print out diagnostic info and fail */
+
+	return;
+}
+
 int main ( void )
 {
 	
@@ -201,17 +457,8 @@ int main ( void )
 	
 	while (true)
 	{
-		/* Print the grid */
-		for (int i { 0 }; i < grid_length; i++)
-		{
-			for (int j { 0 }; j < grid_width; j++)
-			{
-				std::cout << (grid[i][j] ? full : empty);
-			}
-			
-			std::cout << '\n';
-		}
-	
+		print_grid();
+		
 		/* Calculate the neighbours, store in int array */
 		for (int i { 0 }; i < grid_length; i++)
 		{
@@ -252,7 +499,7 @@ int main ( void )
 				continue; /* Doesn't do anything that any other non-q command does */
 			case 'h':
 			case '?':
-				std::cout << "q - quit, r - run, h/? - help, a - about, j - load rules from json, p - print rules\n";
+				std::cout << "q - quit, r - run, h/? - help, a - about, j - load rules from json, p - print rules, b - run BIST\n";
 				break;
 			case 'a':
 				std::cout << "Cellular automata version " << version << " by Tony Nordstrom\n";
@@ -263,6 +510,9 @@ int main ( void )
 				break;
 			case 'p':
 				print_rules();
+				break;
+			case 'b':
+				run_bist();
 				break;
 			default:
 				break;
