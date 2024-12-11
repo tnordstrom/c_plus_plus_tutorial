@@ -29,10 +29,11 @@
  Version 0.4
  - Command b runs built in self test
  Version 0.5
+ - Command i sets grid to random
  - Command z sets rules to random
- - Command s saves rules to json
  - Command d sets rules to default
  - Command e edits rules manually
+ - Command s saves rules to json
  */
 
 #include <iostream>
@@ -45,16 +46,19 @@
 
 using json = nlohmann::json;
 
-const std::string version { "0.4" };
+const std::string version { "0.5" };
 const char empty { ' ' };
 const char full { '#' };
 const int grid_length { 20 };
 const int grid_width { 80 };
 bool grid[grid_length][grid_width];
 int neigh[grid_length][grid_width];
-bool full_cell_rules[9] =
+bool full_cell_rules[9];
+bool empty_cell_rules[9];
+
+const bool full_cell_rules_default[9] =
 { 0, 0, 1, 1, 0, 0, 0, 0, 0 };
-bool empty_cell_rules[9] =
+const bool empty_cell_rules_default[9] =
 { 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 
 /* Calculate the number of neighbouring full cells */
@@ -176,6 +180,36 @@ void get_json(void)
 		index++;
 	}	
 	return;
+}
+
+/*
+ * Save rule set to json file 
+ * Not sure how to prettify it with whitespace, future enhancement 
+ */
+void save_json(void)
+{
+	std::cout << "Writing rules to json file\n";
+	
+	std::ofstream o("output.json");
+	json j = json::object({ {"fcrule0", full_cell_rules[0]},
+							{"fcrule1", full_cell_rules[1]},
+							{"fcrule2", full_cell_rules[2]},
+							{"fcrule3", full_cell_rules[3]},
+							{"fcrule4", full_cell_rules[4]},
+							{"fcrule5", full_cell_rules[5]},
+							{"fcrule6", full_cell_rules[6]},
+							{"fcrule7", full_cell_rules[7]},
+							{"fcrule8", full_cell_rules[8]},
+							{"ecrule0", empty_cell_rules[0]},
+							{"ecrule1", empty_cell_rules[1]},
+							{"ecrule2", empty_cell_rules[2]},
+							{"ecrule3", empty_cell_rules[3]},
+							{"ecrule4", empty_cell_rules[4]},
+							{"ecrule5", empty_cell_rules[5]},
+							{"ecrule6", empty_cell_rules[6]},
+							{"ecrule7", empty_cell_rules[7]},
+							{"ecrule8", empty_cell_rules[8]} });
+	o << j << '\n';
 }
 
 /* Print the current rules */
@@ -477,9 +511,9 @@ void run_bist(void)
 	return;
 }
 
-int main ( void )
+/* Fill the grid randomly */
+void rand_grid(void)
 {
-	
 	/* Fill the grid with random bool values */
 	for (int i { 0 }; i < grid_length; i++)
 	{
@@ -488,6 +522,83 @@ int main ( void )
 			grid[i][j] = rand() % 2 ? false : true;
 		}
 	}
+}
+
+/* Generate random rules */
+void rand_rules(void)
+{
+	for (int i { 0 }; i < 9; i++)
+	{
+		empty_cell_rules[i] = rand() % 2 ? false : true;
+		full_cell_rules[i] = rand() % 2 ? false : true;
+	}
+}
+
+/* Set rules to default */
+void default_rules(void)
+{
+	for (int i { 0 }; i < 9; i++)
+	{
+		empty_cell_rules[i] = empty_cell_rules_default[i];
+		full_cell_rules[i] = full_cell_rules_default[i];
+	}
+}
+
+/* Edit rules manually */
+void edit_rules(void)
+{
+	std::cout << "Edit rules\n";
+	
+	std::cout << "Empty or full? (e/f): ";
+	char response { 0 };
+	std::cin >> response;
+	
+	if ((response == 'e') or (response == 'f'))
+	{
+		std::cout << "Which rule? (0-8): ";
+		int ruleno { 0 };
+		std::cin >> ruleno;
+		
+		if ((ruleno >= 0) and (ruleno < 9))
+		{
+			std::cout << "What state? (0/1): ";
+			bool state { 0 };
+			std::cin >> state;
+			
+			if ((state == 0) or (state == 1))
+			{
+				if (response == 'e')
+				{
+					empty_cell_rules[ruleno] = state;
+				}
+				else
+				{
+					full_cell_rules[ruleno] = state;
+				}
+			}
+			else
+			{
+				std::cout << "Invalid state\n";
+			}
+		}
+		else
+		{
+			std::cout << "Invalid ruleno\n";
+		}
+	}
+	else
+	{
+		std::cout << "Invalid option\n";
+	}
+}
+
+int main ( void )
+{
+	/* Randomize the grid */
+	rand_grid();
+	
+	/* Use default rules initially */
+	default_rules();
 	
 	while (true)
 	{
@@ -533,7 +644,9 @@ int main ( void )
 				continue; /* Doesn't do anything that any other non-q command does */
 			case 'h':
 			case '?':
-				std::cout << "q - quit, r - run, h/? - help, a - about, j - load rules from json, p - print rules, b - run BIST\n";
+				std::cout << "q - quit, r - run, h/? - help, a - about, j - load rules from json, "
+							<< "p - print rules, b - run BIST, i - random grid, z - random rules, "
+							<< "d - set rules to default, e - edit rules, s - save rules to json\n";
 				break;
 			case 'a':
 				std::cout << "Cellular automata version " << version << " by Tony Nordstrom\n";
@@ -548,6 +661,20 @@ int main ( void )
 			case 'b':
 				run_bist();
 				break;
+			case 'i':
+				rand_grid();
+				break;
+			case 'z':
+				rand_rules();
+				break;
+			case 'd':
+				default_rules();
+				break;
+			case 'e':
+				edit_rules();
+				break;
+			case 's':
+				save_json();
 			default:
 				break;
 		}
