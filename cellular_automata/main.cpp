@@ -157,7 +157,10 @@ void apply_rules(int x, int y)
 	return;
 }
 
-/* Read rule set from json file */
+/*
+ * Read rule set from json file
+ * Do I have to close the file?
+ */
 void get_json(void)
 {
 
@@ -184,7 +187,8 @@ void get_json(void)
 
 /*
  * Save rule set to json file 
- * Not sure how to prettify it with whitespace, future enhancement 
+ * Not sure how to prettify it with whitespace, future enhancement
+ * Do I have to close the file? 
  */
 void save_json(void)
 {
@@ -210,6 +214,8 @@ void save_json(void)
 							{"ecrule7", empty_cell_rules[7]},
 							{"ecrule8", empty_cell_rules[8]} });
 	o << j << '\n';
+	
+	return;
 }
 
 /* Print the current rules */
@@ -590,6 +596,8 @@ void edit_rules(void)
 	{
 		std::cout << "Invalid option\n";
 	}
+	
+	return;
 }
 
 int main ( void )
@@ -636,6 +644,7 @@ int main ( void )
 		/* Get a command from the user */
 		char command { 0 };
 		std::cin >> command;
+
 		switch (command)
 		{
 			case 'q':
