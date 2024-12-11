@@ -1,7 +1,11 @@
 /* Tony Nordstrom */
 /* November 28 02024 */
+/* Project name: Cellular Automata */
+/* Project path: /cygdrive/c/dev/c++/cellular_automata */
+/* To build: g++ -Wall -o "main" "main.cpp" */
+/* To run: ./main.exe */
 /* 
- * Cellular Automata Version 0.1
+ Version 0.1
  - Fill grid with random characters
  - Print the grid
  - Calculate the number of neighbouring full cells for each cell
@@ -215,8 +219,14 @@ void print_grid(void)
 void run_bist(void)
 {
 	/* Y-coordinate of centres of each test pattern (X-coord always 1) */
-	//int centres_empty [] = { 1, 4, 7, 10, 13, 16, 19, 22, 25 };
-	//int centres_full [] = { 28, 31, 34, 37, 40, 43, 46, 49, 52 };
+	const int centres_empty [] = { 1, 4, 7, 10, 13, 16, 19, 22, 25 };
+	const int centres_full [] = { 28, 31, 34, 37, 40, 43, 46, 49, 52 };
+
+	int neighbours_empty [9];
+	int neighbours_full [9];
+	const int neighbours_expected [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+	
+	bool pass { true };
 	
 	std::cout << "Running the Built In Self Test\n";
 	
@@ -427,26 +437,50 @@ void run_bist(void)
 	/* Print the grid */
 	print_grid();
 	
-	/* For each test pattern, calculate neighbours and apply rules */
+	/* For each test pattern, calculate neighbours */
 	
-	std::cout << "Applied neighbour rules:\n";
-	
-	/* Print the grid */
-	print_grid();
-	
-	std::cout << "Test result: TBD\n";
-	
-	/* If result matches expected, pass */
-	
-	/* Otherwise, print out diagnostic info and fail */
+	std::cout << "Calculate neighbours:\n";
 
+	for (int i { 0 }; i < 9; i++)
+	{
+		neighbours_empty[i] = neighbours(1, centres_empty[i]);
+		neighbours_full[i] = neighbours(1, centres_full[i]);
+	}
+	
+	/* Print the test pattern neighbours, compare against expected */
+	std::cout << "neighbours empty: ";
+	for (int i { 0 }; i < 9; i++)
+	{
+		std::cout << neighbours_empty[i] << ", ";
+		if (neighbours_empty[i] != neighbours_expected[i])
+		{
+			pass = false;
+			std::cout << "fail: [" << i << "] ";
+		}
+	}
+	std::cout << '\n';
+	
+	std::cout << "neighbours full: ";
+	for (int i { 0 }; i < 9; i++)
+	{
+		std::cout << neighbours_full[i] << ", ";
+		if (neighbours_full[i] != neighbours_expected[i])
+		{
+			pass = false;
+			std::cout << "fail: [" << i << "] ";
+		}
+	}
+	std::cout << '\n';
+	
+	std::cout << "Test result: " << (pass ? "pass" : "fail") << '\n';
+	
 	return;
 }
 
 int main ( void )
 {
 	
-	/* Fill the grid with random empty / full characters */
+	/* Fill the grid with random bool values */
 	for (int i { 0 }; i < grid_length; i++)
 	{
 		for (int j { 0 }; j < grid_width; j++)
