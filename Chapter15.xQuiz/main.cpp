@@ -1,10 +1,12 @@
 /* May 12 02025 */
 /* Chapter 15.x Quiz up to question f */
+/* June 11 02025 Chapter 15.x Quiz up to question h */
 /* Tony Nordstrom */
 
 #include <iostream>
 #include <string>
 #include <string_view>
+#include "random.h"
 
 class Monster
 {
@@ -80,13 +82,51 @@ class Monster
 		
 };
 
+namespace MonsterGenerator
+{
+	std::string_view getName(int n)
+	{
+		switch (n)
+		{
+			case 0: return "Blarg";
+			case 1: return "Moog";
+			case 2: return "Pksh";
+			case 3: return "Tyrn";
+			case 4: return "Mort";
+			case 5: return "Hans";
+			default: return "???";
+		}
+	}
+	
+	std::string_view getRoar(int n)
+	{
+		switch (n)
+		{
+			case 0: return "*ROAR*";
+            case 1:  return "*peep*";
+            case 2:  return "*squeal*";
+            case 3:  return "*whine*";
+            case 4:  return "*growl*";
+            case 5:  return "*burp*";
+            default: return "???";
+		}
+	}
+	
+	Monster generate()
+	{
+        return Monster{
+            static_cast<Monster::Type>(Random::get(0, Monster::maxMonsterTypes-1)),
+            getName(Random::get(0,5)),
+            getRoar(Random::get(0,5)),
+            Random::get(1, 100)
+            };
+	}
+};
+
 int main()
 {
-	Monster skeleton( Monster::skeleton, "Bones", "Rattle", 4);
-	skeleton.print();
-	
-	Monster vampire( Monster::vampire, "Nibblez", "Hiss", 0);
-	vampire.print();
+	Monster m{ MonsterGenerator::generate() };
+	m.print();
 	
 	return 0;
 }
